@@ -1,0 +1,32 @@
+#!/bin/bash
+
+ifconfig #loads ifconfig to allow user to see what device velodyne is plugged in.
+sleep 2
+
+echo "Hello $USER , Please place VLP16db.yaml in catkin_ws and install BLAM! in home/user/ directory" # tells the user what directories things need to be installed in to work.
+
+echo -n "Enter the device port: " # user inputs ethernet device that velodyne is plugged in.
+read device # reads the device name.
+
+echo -n "Enter file name: " # user inputs file name of bag file that will be records.
+read fileName # reads the file name.
+
+nmcli dev disconnect $device # disconnects anything from the device port.
+sudo ifconfig $device 192.168.1.77 up netmask 255.255.0.0 # assigns ip to the device port for velodyne to transmitt.
+
+gnome-terminal -e "roscore" # opens a terminal with roscore.
+sleep 2 # sleeps for two seconds allow roscore to open.
+
+source devel/setup.bash
+gnome-terminal -e "rosrun velodyne_driver velodyne_node _model:=VLP16" # opens terminal and runs velodyne_drivers (reads velodyne data and turns into velodyne_packet topic)
+gnome-terminal -e "rosrun velodyne_pointcloud cloud_node _calibration:=VLP16db.yaml" # opens terminal and runs velodyne_pointcloud (reads velodyne_packet topic and converts into velodyne_pointcloud)
+
+sleep 2
+
+gnome-terminal -e "rosrun rviz rviz -d /home/user/blam/internal/src/blam_example/rviz/lidar_slam.rviz" # opens up rviz with the BLAM! config loaded ready to view in coming data.
+
+gnome-terminal -e "rosbag record -O /home/user/catkin_ws/$fileName.bag /blam/blam_slam/octree_map_updates" # begins a recording on the BLAM! topic that displays the 3D space data.
+
+cd ../blam/internal # cd's to the BLAM! installation.
+source devel/setup.bash # sources to setup.bash
+roslaunch blam_example test_online.launch # runs BLAM! online algorithm.

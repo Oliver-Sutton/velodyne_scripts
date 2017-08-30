@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo -n "What is the file name? " # asks the user the file name.
+read fileName # reads the file name.
+
+mv "$fileName.bag.active" "$fileName.bag" # renames file to remove .active
+
+rosbag reindex $fileName.bag # reindexes .bag file so it can be read.
+rosbag info $fileName.bag # displays the info of the file to the user.

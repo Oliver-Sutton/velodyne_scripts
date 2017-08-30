@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo -n "What is the file name? " # asks user for file name.
+read fileName # reads file name.
+
+echo -n "Name of new folder to save .pcd files to? " # asks user where to save .pcd files.
+read pcdFolder # reads folder name.
+
+gnome-terminal -e "roscore" # opens a roscore terminal to allow rosrun to be exectued.
+sleep 2 
+
+rosrun pcl_ros bag_to_pcd $fileName.bag /blam/blam_slam/octree_map_update ./$pcdFolder # runs pcl_ros command to convert bag file to .pcd files that can be imported to cloudcompare.
